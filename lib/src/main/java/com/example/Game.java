@@ -1,5 +1,7 @@
 package com.example;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -30,7 +32,7 @@ public class Game {
         for (int i = 0; i < board.length; i++) {
             boolean[] row = board[i];
             for (int j = 0; j < row.length; j++) {
-                board[i][j] = random.nextBoolean();
+                board[i][j] = (random.nextFloat() < 0.2);
             }
         }
         this.board = board;
@@ -65,13 +67,47 @@ public class Game {
 
     private int getNumberOfLiveNeighbours(boolean[][] board, int i, int j) {
         int live = 0;
-        for (int i1 = i - 1; i1 <= i + 1; i1++) {
-            for (int j1 = j - 1; j1 <= j + 1; j1++) {
-                if (i1 >= 0 && i1 < boardSize && j1 >= 0 && j1 < boardSize && board[i1][j1])
-                    live++;
+
+        List<CellAddress> neighbours = getNeighbours(i,j);
+        for (CellAddress neighbour : neighbours) {
+            if(cellIsAlive(board, neighbour.x, neighbour.y))
+                live ++;
+        }
+
+        return live;
+    }
+
+    protected List<CellAddress> getNeighbours(int x, int y) {
+        List<CellAddress> result = new ArrayList<>();
+        for (int neighbourx = x - 1; neighbourx <= x + 1; neighbourx++) {
+            for (int neighboury = y - 1; neighboury <= y + 1; neighboury++) {
+                if(neighbourx != x || neighboury != y) //Don't add the original cell
+                    result.add(getAddress(neighbourx, neighboury));
             }
         }
-        return live;
+        return result;
+    }
+
+    private CellAddress getAddress(int x, int y) {
+        return new CellAddress(getValidCoordinate(x), getValidCoordinate(y));
+    }
+
+    private int getValidCoordinate(int i){
+        if(i == -1)
+            return boardSize - 1;
+        if(i == boardSize)
+            return 0;
+        return i;
+    }
+
+    static class CellAddress {
+        public final int x;
+        public final int y;
+
+        CellAddress(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 
 }
